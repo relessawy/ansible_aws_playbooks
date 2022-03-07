@@ -1,0 +1,45 @@
+---
+- name: Build ami
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+  - name: launch temporary instance
+    ec2:
+      assign_public_ip: yes
+      region: ap-southeast-2
+      key_name: AWS-key-pair
+      group: default
+      instance_type: t2.micro
+      vpc_subnet_id: subnet-05bc04d90ca88e59d
+      image: ami-02af4b27cfc41bd6f
+      wait: yes
+      wait_timeout: 500
+      exact_count: 1
+      count_tag:
+         role: ami_builder
+      instance_tags:
+         role: ami_builder
+    register: ami_instance
+
+ 
+  - name: add host to group
+    add_host: name={{ ami_instance.tagged_instances.0.public_ip }} groups=just_created
+
+  - name: create ami
+    action: 
+      module: ec2_ami
+      instance_id: "{{ ami_instance.tagged_instances.0.id }}"
+      region: ap-southeast-2
+      state: present
+      description: AMI created as golden image
+      name: goldenAmi
+      wait: yes
+    register: amioutput
+
+  - name: terminate temporary instance
+    action:
+      module: ec2
+      state: absent
+      region: ap-southeast-2
+      instance_ids: "{{ ami_instance.tagged_instances.0.id }}"
