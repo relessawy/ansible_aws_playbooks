@@ -23,9 +23,6 @@
     register: ami_instance
 
  
-  - name: add host to group
-    add_host: name={{ ami_instance.tagged_instances.0.public_ip }} groups=just_created
-
   - name: create ami
     action: 
       module: ec2_ami
