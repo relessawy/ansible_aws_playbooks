@@ -7,9 +7,9 @@
 
   - name: gather facts about an AMI with 'AMI Name' equal to foobar
     ec2_ami_facts:
-    filters:
-      name: "{{ ami_name }}"
-    register: ami_instance
+     filters:
+       name: "{{ ami_name }}"
+     register: ami_instance
 
   - name: print out AMI ID
     debug:
