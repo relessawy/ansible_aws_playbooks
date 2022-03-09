@@ -1,0 +1,31 @@
+---
+- name: launch temporary ec2
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+
+  - name: gather facts about an AMI with 'AMI Name' equal to foobar
+    ec2_ami_facts:
+    filters:
+      name: {{ ami_name }}
+    register: ami_instance
+
+  - name: print out AMI ID
+    debug:
+      var: "{{ ami_instance.tagged_instances.0.id }}"
+
+  - name: launch temporary instance
+    ec2:
+      assign_public_ip: yes
+      region: ap-southeast-2
+      key_name: AWS-key-pair
+      group: default
+      instance_type: t2.micro
+      vpc_subnet_id: subnet-05bc04d90ca88e59d
+      image: "{{ ami_instance.tagged_instances.0.id }}"
+      wait: yes
+      wait_timeout: 500
+      exact_count: 1
+      
+ 
