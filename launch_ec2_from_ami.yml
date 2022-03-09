@@ -17,13 +17,15 @@
 
   - name: launch temporary instance
     ec2_instance:
-      assign_public_ip: yes
-      region: ap-southeast-2
       key_name: AWS-key-pair
-      group: default
       instance_type: t2.micro
-      vpc_subnet_id: subnet-05bc04d90ca88e59d
       image: "{{ ami_instance.tagged_instances.0.id }}"
+      region: ap-southeast-2
+      group: default
+      vpc_subnet_id: subnet-05bc04d90ca88e59d
+      assign_public_ip: yes
+      instance_tags:
+       purpose: golden_image
       wait: yes
       wait_timeout: 500
      
