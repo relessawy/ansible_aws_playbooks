@@ -1,0 +1,24 @@
+---
+- name: launch temporary ec2
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+  - name: launch temporary instance
+    ec2:
+      assign_public_ip: yes
+      region: ap-southeast-2
+      key_name: AWS-key-pair
+      group: default
+      instance_type: t2.micro
+      vpc_subnet_id: subnet-05bc04d90ca88e59d
+      image: ami-02af4b27cfc41bd6f
+      wait: yes
+      wait_timeout: 500
+      exact_count: 1
+      count_tag:
+         role: ami_builder
+      instance_tags:
+         role: ami_builder
+    register: ami_instance
+ 
