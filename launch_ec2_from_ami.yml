@@ -14,7 +14,7 @@
 
   - name: print out AMI ID
     debug:
-      var: "{{ ami_instance.tagged_instances.0.id }}"
+      msg: "{{ ami_instance.image_id }}"
 
   - name: launch temporary instance
     amazon.aws.ec2_instance:
