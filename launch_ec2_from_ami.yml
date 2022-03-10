@@ -5,11 +5,11 @@
 
   tasks:
 
-  - name: gather facts about an AMI with 'AMI Name' equal to foobar
+  - name: gather facts about an AMI with 'AMI Name' 
     ec2_ami_facts:
      filters:
        name: "{{ ami_name }}"
-     register: ami_instance
+    register: ami_instance
 
   - name: print out AMI ID
     debug:
