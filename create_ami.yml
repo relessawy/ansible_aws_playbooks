@@ -10,7 +10,7 @@
   - name: create ami
     action: 
       module: ec2_ami
-      instance_id: i-07233a3e0ed225f25
+      instance_id: "{{ instance_id }}"
       region: ap-southeast-2
       state: present
       description: AMI created as golden image
