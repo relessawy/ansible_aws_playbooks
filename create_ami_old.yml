@@ -1,0 +1,23 @@
+---
+- name: Build ami
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+  - name: create ami
+    action: 
+      module: ec2_ami
+      instance_id: "{{ ami_instance.tagged_instances.0.id }}"
+      region: ap-southeast-2
+      state: present
+      description: AMI created as golden image
+      name: goldenAMI
+      wait: yes
+    register: amioutput
+
+  - name: terminate temporary instance
+    action:
+      module: ec2
+      state: absent
+      region: ap-southeast-2
+      instance_ids: "{{ ami_instance.tagged_instances.0.id }}"

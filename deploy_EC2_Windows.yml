@@ -1,0 +1,143 @@
+---
+
+# PLAY 1:  Provision Windows
+
+- name: Provision New Windowes Instances
+  hosts: localhost
+  gather_facts: true
+
+  vars:
+    os_type: "windows"
+    root_user: ec2-user
+    root_password: MyPassw0rd21
+
+  tasks:
+
+    - block:
+
+      - set_fact:
+          create_date: "{{ ansible_date_time.epoch }}"
+        when: create_date is not defined
+
+      - name: Show ansible version
+        command: ansible --version
+    
+      - set_stats:
+          data:
+            hosts_filter_windows: "{{ 'tag_AnsibleCreated_Windows_'  + create_date }}"
+            deploy_location: aws
+       
+
+      when: hosts_filter_windows is not defined
+
+# PLAY 2:  Deploy EC2 
+- name: Manage Newly Created Windows Instances
+  hosts: windows
+  gather_facts: true
+  
+  tasks:
+  - name: Deploy EC2
+      ec2:
+      key_name: "{{ ec2_ssh_key_name }}"
+      group:
+        - "{{ ec2_security_group }}"
+      instance_type: "{{ ec2_windows_instance_type }}"
+      exact_count: 1
+      count_tag:
+        Name: "{{ tower_user_name }}-{{ win_server_name }}{{ item }}"
+      instance_tags:
+        Name: "{{tower_user_name}}-{{ win_server_name }}{{ item }}"
+        no_daily_shutdown: 'false'
+        App: "{{ app_name }}"
+        AnsibleCreated_Windows:  "{{ create_date }}"  #"{{ create_date }}"
+        Provision_Date: "{{ create_date }}"
+        OS_Type: "{{ os_type }}"
+        Owner: "{{ tower_user_name }}"
+      image: "{{ ec2_ami_ids[ec2_windows_server_ami_type] }}"
+      wait: true
+      region: "{{ ec2_region }}"
+      vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
+      user_data: "{{ lookup('template', 'win_ec2_user_data.j2', template_vars=dict(vm_name=win_server_name + item)) }}"
+      assign_public_ip: yes
+    with_sequence: count={{win_count}}
+    register: windows_jobs
+    async: 7200
+    poll: 0
+   
+  
+  ################### Wait for Jobs ###################
+  
+  - name: Windows | Wait for instance creation to complete
+    async_status: jid="{{ item.ansible_job_id }}"
+    register: windows_instances
+    until: windows_instances.finished
+    retries: 300
+    with_items: "{{ windows_jobs.results }}"
+    when: os_type == 'windows'
+  
+  
+  - name: Windows | Obtain windows passwords for instances
+    ec2_win_password:
+      region: '{{ ec2_region }}'
+      instance_id: "{{ item.id }}"
+      key_file: "{{ ec2_ssh_key_name +'.pem' }}"
+      #key_data: "{{ ssh_key }}"  
+      wait: yes
+      wait_timeout: 300
+    with_items: "{{ windows_instances.results | map(attribute='tagged_instances') | list }}"
+    register: ec2windows_password
+    when: windows_instances is defined and os_type == 'windows'
+  
+
+  
+  - name: Windows Servers | Add new instance to host group
+    add_host:
+      hostname: "{{ item.item.tags.Name }}"
+      ansible_host: "{{ item.item.public_ip }}"
+      ansible_port: "{{ '22' if (windows_ansible_connection is defined and windows_ansible_connection == 'ssh') else '5986' }}"
+      ansible_user: "Administrator"
+      ansible_password: "{{ item.win_password }}"
+      ansible_connection: "{{ windows_ansible_connection | default('winrm') }}"
+      ansible_shell_type: "cmd"
+      private_ip: "{{ item.item.private_ip }}"
+      ansible_winrm_transport: "{{ ansible_winrm_transport }}"
+      ansible_winrm_server_cert_validation: "{{ ansible_winrm_server_cert_validation }}"
+      ansible_winrm_operation_timeout_sec: "{{ ansible_winrm_operation_timeout_sec }}"
+      ansible_winrm_read_timeout_sec: "{{ ansible_winrm_read_timeout_sec }}"
+      groups: windows
+    with_items: "{{ ec2windows_password.results }}"
+    when: ec2windows_password is defined and os_type == 'windows'
+  
+  
+  - name: Wait for connection on all Windows nodes
+    wait_for_connection:
+    delegate_to: "{{ item }}"
+    with_items:
+      - "{{ groups['windows'] }}"
+    when: os_type == 'windows'
+
+  
+# PLAY 3:  Manage New Windows Instances
+
+- name: Manage Newly Created Windows Instances
+  hosts: windows
+  gather_facts: true
+
+  tasks:
+
+    - name: Set Server Details
+      set_fact:
+        server_details: " {{ ansible_hostname }}  {{ ansible_os_name }}"
+
+    - name: Show Host OS
+      debug:
+        msg: "{{ server_details }}"
+     
+    - name: Create Admin User
+      win_user:
+        name: hilfigert
+        password: Ansible123!     # test this with Machine Password
+        groups:
+          - Administrators
+        state: present
+  
