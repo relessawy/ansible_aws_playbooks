@@ -2,7 +2,7 @@
 - name: Build GoldenAMI
   #hosts filter used when coming from a provision template
   hosts: "{{ hosts_filter_windows | default('all') }}"
-  gather_facts: no
+  gather_facts: true
 
   tasks:
   
@@ -13,6 +13,6 @@
       region: ap-southeast-2
       state: present
       description: AMI created as golden image
-      name: goldenAMI
+      name: goldenAMI-"{{ ansible_date_time.epoch }}"
       wait: yes
     register: goldenAMI
