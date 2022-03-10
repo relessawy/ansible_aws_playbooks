@@ -2,7 +2,7 @@
 - name: Build GoldenAMI
   #hosts filter used when coming from a provision template
   hosts: "{{ hosts_filter_windows | default('all') }}"
-  gather_facts: true
+  gather_facts: no
 
   tasks:
   
