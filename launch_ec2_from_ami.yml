@@ -16,7 +16,7 @@
       var: "{{ ami_instance.tagged_instances.0.id }}"
 
   - name: launch temporary instance
-    ec2_instance:
+    amazon.aws.ec2_instance:
       key_name: AWS-key-pair
       instance_type: t2.micro
       image: "{{ ami_instance.tagged_instances.0.id }}"
