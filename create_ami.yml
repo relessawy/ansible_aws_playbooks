@@ -8,7 +8,7 @@
 
   - name: print out AMI Name
     debug:
-      msg: goldenAMI-"{{ ansible_date_time.epoch }}"
+      msg: goldenAMI-{{ ansible_date_time.epoch }}
   
   - name: create ami
     action: 
@@ -17,6 +17,6 @@
       region: ap-southeast-2
       state: present
       description: AMI created as golden image
-      name: goldenAMI-"{{ ansible_date_time.epoch }}"
+      name: goldenAMI-{{ ansible_date_time.epoch }}
       wait: yes
     register: goldenAMI
