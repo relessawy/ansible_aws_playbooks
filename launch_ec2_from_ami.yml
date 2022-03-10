@@ -6,7 +6,8 @@
   tasks:
 
   - name: gather facts about an AMI with 'AMI Name' 
-    ec2_ami_facts:
+    ec2_ami_info:
+     region: ap-southeast-2
      filters:
        name: "{{ ami_name }}"
     register: ami_instance
