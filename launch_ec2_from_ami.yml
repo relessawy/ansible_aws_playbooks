@@ -6,7 +6,7 @@
   tasks:
 
   - name: gather facts about an AMI with 'AMI Name' 
-    ec2_ami_facts:
+    ec2_ami_info:
      region: ap-southeast-2
      filters:
        name: "{{ ami_name }}"
@@ -20,7 +20,7 @@
     amazon.aws.ec2_instance:
       key_name: AWS-key-pair
       instance_type: t2.micro
-      image: "{{ ami_instance.tagged_instances.0.id }}"
+      image: "{{ ami_instance.images[0].image_id }}"
       region: ap-southeast-2
       group: default
       vpc_subnet_id: subnet-05bc04d90ca88e59d
