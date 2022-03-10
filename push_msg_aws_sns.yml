@@ -1,0 +1,11 @@
+- name: Push SNS MSG
+  hosts: localhost
+  tasks:
+  - name: Send message via SNS Topic
+    local_action:
+      module: sns
+      msg: "Message"
+      subject: "Subject"
+      topic: "arn:aws:sns:ap-southeast-2:239048922879:notifyuser"
+      region: ap-southeast-2
+      key_name: AWS-key-pair

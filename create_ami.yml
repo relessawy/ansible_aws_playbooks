@@ -6,10 +6,7 @@
 
   tasks:
 
-  - name: print out AMI Name
-    debug:
-      msg: goldenAMI-{{ ansible_date_time.epoch }}
-  
+ 
   - name: create ami
     action: 
       module: ec2_ami
