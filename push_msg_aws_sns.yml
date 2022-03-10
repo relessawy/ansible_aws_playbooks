@@ -3,7 +3,7 @@
   
   tasks:
   - name: Send message via SNS Topic
-    community.aws.sns:
+    sns:
       msg: "Message"
       subject: "Subject"
       topic: "arn:aws:sns:ap-southeast-2:239048922879:notifyuser"
