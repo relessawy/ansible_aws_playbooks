@@ -5,7 +5,7 @@
   - name: Send message via SNS Topic
     sns:
       msg: "The golden image creation job was completed successfully."
-      subject: "GolfnAMI Created"
+      subject: "GoldenAMI Created"
       topic: "arn:aws:sns:ap-southeast-2:239048922879:notifyuser"
       region: ap-southeast-2
     delegate_to: localhost
