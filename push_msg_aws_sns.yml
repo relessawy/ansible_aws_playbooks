@@ -4,8 +4,8 @@
   tasks:
   - name: Send message via SNS Topic
     sns:
-      msg: "The golden image creation job was completed successfully."
-      subject: "GoldenAMI Created"
+      msg: "{{ sns_msg }}"
+      subject: "{{ sns_subject }}"
       topic: "arn:aws:sns:ap-southeast-2:239048922879:notifyuser"
       region: ap-southeast-2
     delegate_to: localhost
